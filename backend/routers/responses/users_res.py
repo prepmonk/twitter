@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 from backend.models.users_model import  UserBaseResponse
-from backend.models.posts_model import PostBaseResponse
+from backend.models.posts_model import PostResponse
 
 class UserFullResponse(UserBaseResponse):
-    posts: Optional[List["PostBaseResponse"]] = None
+    posts: List["PostResponse"] = []
 
  
