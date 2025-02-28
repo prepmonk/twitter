@@ -3,9 +3,13 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from backend.db.database import Database, get_db
+
 from backend.models.users_model import User, UserBaseResponse
+from backend.models.follow_model import Follow
 
 from backend.routers.requests.user_req import UserCreateRequest, UserUpdateRequest
+from backend.routers.requests.follow_req import FollowCreateRequest
+
 from backend.routers.responses.users_res import UserFullResponse
 from backend.utils.password_helper import hash_password
 
@@ -47,3 +51,18 @@ async def delete_user(db: Annotated[Database, Depends(get_db)],
                 user_id: int):
     db.delete(db_cls=User, id=user_id)
     return JSONResponse({"ok": True})
+
+
+#follow
+
+@router.post("/follow", response_model=UserFullResponse)
+async def follow_user(
+    db: Annotated[Database, Depends(get_db)], 
+    follow: FollowCreateRequest
+    ):
+    user_follow: Follow = db.create(db_cls=Follow, req_obj=follow, extra_params={})
+    db_user: User = db.fetch_one(db_cls=User, db_id=follow.user_id)
+    db_friend: User = db.fetch_one(db_cls=User, db_id=follow.follow_id)
+    db_user.following.append(user_follow)
+    db_user = db.save(db_user)
+    return db_user
